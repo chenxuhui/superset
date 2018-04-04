@@ -7,6 +7,13 @@ import {
   resizeComponent,
 } from '../actions';
 
+function mapStateToProps({ undoableLayout }, ownProps) {
+  return {
+    layout: undoableLayout.present,
+    cells: ownProps.cells,
+  };
+}
+
 function mapDispatchToProps(dispatch) {
   return bindActionCreators({
     handleComponentDrop,
@@ -14,4 +21,4 @@ function mapDispatchToProps(dispatch) {
   }, dispatch);
 }
 
-export default connect(null, mapDispatchToProps)(DashboardGrid);
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardGrid);

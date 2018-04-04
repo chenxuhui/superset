@@ -18,10 +18,11 @@ import {
 } from '../util/constants';
 
 const propTypes = {
-  editMode: PropTypes.bool,
+  cells: PropTypes.object.isRequired,
 
   // redux
-  dashboard: PropTypes.object.isRequired,
+  layout: PropTypes.object.isRequired,
+  editMode: PropTypes.bool,
   deleteTopLevelTabs: PropTypes.func.isRequired,
   handleComponentDrop: PropTypes.func.isRequired,
 };
@@ -52,16 +53,16 @@ class DashboardBuilder extends React.Component {
 
   render() {
     const { tabIndex } = this.state;
-    const { handleComponentDrop, dashboard, deleteTopLevelTabs } = this.props;
-    const dashboardRoot = dashboard[DASHBOARD_ROOT_ID];
+    const { handleComponentDrop, layout, deleteTopLevelTabs } = this.props;
+    const dashboardRoot = layout[DASHBOARD_ROOT_ID];
     const rootChildId = dashboardRoot.children[0];
-    const topLevelTabs = rootChildId !== DASHBOARD_GRID_ID && dashboard[rootChildId];
+    const topLevelTabs = rootChildId !== DASHBOARD_GRID_ID && layout[rootChildId];
 
     const gridComponentId = topLevelTabs
       ? topLevelTabs.children[Math.min(topLevelTabs.children.length - 1, tabIndex)]
       : DASHBOARD_GRID_ID;
 
-    const gridComponent = dashboard[gridComponentId];
+    const gridComponent = layout[gridComponentId];
 
     return (
       <div className="dashboard-v2">
@@ -102,6 +103,7 @@ class DashboardBuilder extends React.Component {
               index={0}
               renderTabContent={false}
               onChangeTab={this.handleChangeTab}
+              cells={this.props.cells}
             />
           </WithPopoverMenu>}
 
@@ -109,6 +111,7 @@ class DashboardBuilder extends React.Component {
           <DashboardGrid
             gridComponent={gridComponent}
             depth={DASHBOARD_ROOT_DEPTH + 1}
+            cells={this.props.cells}
           />
           <BuilderComponentPane />
         </div>

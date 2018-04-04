@@ -24,6 +24,7 @@ const propTypes = {
   parentComponent: componentShape.isRequired,
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
+  cells: PropTypes.object.isRequired,
 
   // grid related
   availableColumnCount: PropTypes.number.isRequired,
@@ -92,6 +93,7 @@ class Row extends React.PureComponent {
       onResize,
       onResizeStop,
       handleComponentDrop,
+      cells,
     } = this.props;
 
     const rowItems = [];
@@ -160,6 +162,7 @@ class Row extends React.PureComponent {
                     index={itemIndex / 2} // account for gutters!
                     availableColumnCount={availableColumnCount - occupiedColumnCount}
                     columnWidth={columnWidth}
+                    cells={cells}
                     onResizeStart={onResizeStart}
                     onResize={onResize}
                     onResizeStop={onResizeStop}

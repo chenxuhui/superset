@@ -29,6 +29,7 @@ const propTypes = {
   parentComponent: componentShape.isRequired,
   index: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
+  cells: PropTypes.object.isRequired,
 
   // grid related
   availableColumnCount: PropTypes.number.isRequired,
@@ -95,6 +96,7 @@ class Column extends React.PureComponent {
       onResize,
       onResizeStop,
       handleComponentDrop,
+      cells,
     } = this.props;
 
     const columnItems = [];
@@ -167,21 +169,22 @@ class Column extends React.PureComponent {
                     return <div key={`gutter-${itemIndex}`} style={{ height: GRID_GUTTER_SIZE }} />;
                   }
 
-                  return (
-                    <DashboardComponent
-                      key={componentId}
-                      id={componentId}
-                      parentId={columnComponent.id}
-                      depth={depth + 1}
-                      index={itemIndex / 2} // account for gutters!
-                      availableColumnCount={columnComponent.meta.width}
-                      columnWidth={columnWidth}
-                      onResizeStart={onResizeStart}
-                      onResize={onResize}
-                      onResizeStop={onResizeStop}
-                    />
-                  );
-                })}
+                return (
+                  <DashboardComponent
+                    key={componentId}
+                    id={componentId}
+                    parentId={columnComponent.id}
+                    depth={depth + 1}
+                    index={itemIndex / 2} // account for gutters!
+                    availableColumnCount={columnComponent.meta.width}
+                    columnWidth={columnWidth}
+                    cells={cells}
+                    onResizeStart={onResizeStart}
+                    onResize={onResize}
+                    onResizeStop={onResizeStop}
+                  />
+                );
+              })}
 
                 {dropIndicatorProps && <div {...dropIndicatorProps} />}
               </div>
