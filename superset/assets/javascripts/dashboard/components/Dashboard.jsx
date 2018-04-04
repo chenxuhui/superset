@@ -12,6 +12,7 @@ import { Logger, ActionLog, LOG_ACTIONS_PAGE_LOAD,
 import { t } from '../../locales';
 
 import '../../../stylesheets/dashboard.css';
+import '../../../stylesheets/static-grid.less';
 import '../v2/stylesheets/index.less';
 
 const propTypes = {
@@ -308,15 +309,16 @@ class Dashboard extends React.PureComponent {
             setEditMode={this.props.actions.setEditMode}
           />
         </div>
-        <div id="grid-container" className="slice-grid gridster">
-          <GridLayout
+        <GridLayout
             dashboard={this.props.dashboard}
+            layout={this.props.layout}
             datasources={this.props.datasources}
             allSlices={this.props.allSlices}
             filters={this.props.filters}
             charts={this.props.charts}
             timeout={this.props.timeout}
             onChange={this.onChange}
+            rerenderCharts={this.rerenderCharts}
             getFormDataExtra={this.getFormDataExtra}
             exploreChart={this.exploreChart}
             exportCSV={this.exportCSV}
@@ -330,7 +332,6 @@ class Dashboard extends React.PureComponent {
             removeFilter={this.props.actions.removeFilter}
             editMode={this.props.editMode}
           />
-        </div>
       </div>
     );
   }

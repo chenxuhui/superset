@@ -126,7 +126,7 @@ class Chart extends React.PureComponent {
   }
 
   width() {
-    return this.props.width || this.container.el.offsetWidth;
+    return this.props.width;
   }
 
   headerHeight() {
@@ -134,7 +134,7 @@ class Chart extends React.PureComponent {
   }
 
   height() {
-    return this.props.height || this.container.el.offsetHeight;
+    return this.props.height;
   }
 
   d3format(col, number) {
@@ -200,7 +200,8 @@ class Chart extends React.PureComponent {
   render() {
     const isLoading = this.props.chartStatus === 'loading';
     return (
-      <div className={`token col-md-12 ${isLoading ? 'is-loading' : ''}`}>
+      <div
+        className={`${isLoading ? 'is-loading' : ''}`}>
         {this.renderTooltip()}
         {isLoading &&
           <Loading size={25} />

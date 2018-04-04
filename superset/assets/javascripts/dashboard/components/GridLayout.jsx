@@ -1,23 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import cx from 'classnames';
 
 import GridCell from './GridCell';
 import { slicePropShape } from '../reducers/propShapes';
-
-require('react-grid-layout/css/styles.css');
-require('react-resizable/css/styles.css');
-
-const ResponsiveReactGridLayout = WidthProvider(Responsive);
+import DashboardBuilder from '../v2/containers/DashboardBuilder';
+import { convertToPositions } from '../v2/util/layoutConverter';
 
 const propTypes = {
   dashboard: PropTypes.object.isRequired,
+  layout: PropTypes.object.isRequired,
   datasources: PropTypes.object,
   charts: PropTypes.object.isRequired,
   allSlices: PropTypes.objectOf(slicePropShape).isRequired,
   filters: PropTypes.object,
   timeout: PropTypes.number,
   onChange: PropTypes.func,
+  rerenderCharts: PropTypes.func,
   getFormDataExtra: PropTypes.func,
   exploreChart: PropTypes.func,
   exportCSV: PropTypes.func,
@@ -25,12 +24,12 @@ const propTypes = {
   saveSliceName: PropTypes.func,
   removeSlice: PropTypes.func,
   removeChart: PropTypes.func,
-  updateDashboardLayout: PropTypes.func,
   toggleExpandSlice: PropTypes.func,
   addFilter: PropTypes.func,
   getFilters: PropTypes.func,
   removeFilter: PropTypes.func,
   editMode: PropTypes.bool.isRequired,
+  showBuilderPane: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -42,7 +41,6 @@ const defaultProps = {
   saveSlice: () => ({}),
   removeSlice: () => ({}),
   removeChart: () => ({}),
-  updateDashboardLayout: () => ({}),
   toggleExpandSlice: () => ({}),
   addFilter: () => ({}),
   getFilters: () => ({}),
@@ -53,22 +51,10 @@ class GridLayout extends React.Component {
   constructor(props) {
     super(props);
 
-    this.onResizeStop = this.onResizeStop.bind(this);
-    this.onDragStop = this.onDragStop.bind(this);
     this.forceRefresh = this.forceRefresh.bind(this);
     this.removeSlice = this.removeSlice.bind(this);
     this.updateSliceName = this.props.dashboard.dash_edit_perm ?
       this.updateSliceName.bind(this) : null;
-  }
-
-  onResizeStop(layout) {
-    this.props.updateDashboardLayout(layout);
-    this.props.onChange();
-  }
-
-  onDragStop(layout) {
-    this.props.updateDashboardLayout(layout);
-    this.props.onChange();
   }
 
   getWidgetId(sliceId) {
@@ -80,7 +66,7 @@ class GridLayout extends React.Component {
     if (!widgetId || !this.refs[widgetId]) {
       return 400;
     }
-    return this.refs[widgetId].offsetHeight;
+    return this.refs[widgetId].parentNode.clientHeight;
   }
 
   getWidgetWidth(sliceId) {
@@ -88,7 +74,7 @@ class GridLayout extends React.Component {
     if (!widgetId || !this.refs[widgetId]) {
       return 400;
     }
-    return this.refs[widgetId].offsetWidth;
+    return this.refs[widgetId].parentNode.clientWidth;
   }
 
   forceRefresh(sliceId) {
@@ -121,19 +107,24 @@ class GridLayout extends React.Component {
       this.props.dashboard.metadata.expanded_slices[sliceId];
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.editMode !== this.props.editMode) {
+      this.props.rerenderCharts();
+    }
+  }
   render() {
-    const cells = this.props.dashboard.sliceIds.map((sliceId) => {
+    const cells = {};
+    this.props.dashboard.sliceIds.map((sliceId) => {
       const key = `slice_${sliceId}`;
       const currentChart = this.props.charts[key];
       const currentSlice = this.props.allSlices[key];
       const currentDatasource = this.props.datasources[currentChart.form_data.datasource];
       const queryResponse = currentChart.queryResponse || {};
-
-      return (
+      cells[key] = (
         <div
           id={key}
           key={sliceId}
-          className={`widget ${currentSlice.viz_type}`}
+          className={cx('widget', `${currentSlice.viz_type}`, { 'is-edit': this.props.editMode })}
           ref={this.getWidgetId(sliceId)}
         >
           <GridCell
@@ -162,25 +153,44 @@ class GridLayout extends React.Component {
             annotationQuery={currentChart.annotationQuery}
             annotationError={currentChart.annotationError}
           />
-        </div>);
+        </div>
+        );
     });
 
-    return (
-      <ResponsiveReactGridLayout
-        className="layout"
-        layouts={{ lg: this.props.dashboard.layout }}
-        onResizeStop={this.onResizeStop}
-        onDragStop={this.onDragStop}
-        cols={{ lg: 48, md: 48, sm: 40, xs: 32, xxs: 24 }}
-        rowHeight={10}
-        autoSize
-        margin={[20, 20]}
-        useCSSTransforms
-        draggableHandle=".drag"
-      >
-        {cells}
-      </ResponsiveReactGridLayout>
-    );
+    if (!this.props.editMode) {
+      const positions = convertToPositions(this.props.layout);
+      const staticCells = Object.keys(positions).map((key) => {
+        const { row, col, colSpan, rowSpan, chartKey } = positions[key];
+        const style = {
+          'gridColumn': `${col} / span ${colSpan}`,
+          'gridRow': `${row} / span ${rowSpan}`,
+          position: 'relative',
+          background: '#fff',
+        };
+        console.log('style', chartKey, style.gridRow)
+
+        return (
+          <div
+            className="grid-cell"
+            style={style}
+            key={'grid_' + chartKey}
+          >
+            {cells[key]}
+          </div>
+        );
+      });
+
+      return (<div className="grid-wrapper">
+          {staticCells}
+        </div>);
+    } else {
+      return (
+        <DashboardBuilder
+          cells={cells}
+          editMode={this.props.editMode}
+        />
+      );
+    }
   }
 }
 

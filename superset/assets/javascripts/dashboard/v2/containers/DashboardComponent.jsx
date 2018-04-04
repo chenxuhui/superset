@@ -51,9 +51,9 @@ function mapStateToProps({ undoableLayout }, ownProps) {
       }
     });
   } else if (props.component.type === CHART_TYPE) {
-    const sliceId = props.component.meta && props.component.meta.sliceId;
-    if (sliceId) {
-      props.chart = cells[sliceId];
+    const chartKey = props.component.meta && props.component.meta.chartKey;
+    if (chartKey) {
+      props.chart = cells[chartKey];
     }
   }
 
