@@ -11,7 +11,7 @@ function mapStateToProps({ undoableLayout, dashboard }, ownProps) {
   return {
     layout: undoableLayout.present,
     cells: ownProps.cells,
-    editMode: dashboard.editMode,
+    showBuilderPane: dashboard.showBuilderPane,
   };
 }
 

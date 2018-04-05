@@ -112,7 +112,7 @@ class Column extends React.PureComponent {
       opt => opt.value === (columnComponent.meta.background || BACKGROUND_TRANSPARENT),
     );
 
-    console.log('occupied/avail cols', columnComponent.meta.width, '/', availableColumnCount, 'min width', minColumnWidth)
+    //console.log('occupied/avail cols', columnComponent.meta.width, '/', availableColumnCount, 'min width', minColumnWidth)
 
     return (
       <DragDroppable

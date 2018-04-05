@@ -114,7 +114,7 @@ export function moveComponent(dropResult) {
 export const HANDLE_COMPONENT_DROP = 'HANDLE_COMPONENT_DROP';
 export function handleComponentDrop(dropResult) {
   return (dispatch, getState) => {
-    const { source, destination } = dropResult;
+    const { source, destination, dragging } = dropResult;
     const droppedOnRoot = destination && destination.id === DASHBOARD_ROOT_ID;
     const isNewComponent = source.id === NEW_COMPONENTS_SOURCE_ID;
 

@@ -28,15 +28,15 @@ const defaultProps = {
 class SliceHeaderControls extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.exportCSV = this.props.exportCSV.bind(this, this.props.slice);
-    this.exploreChart = this.props.exploreChart.bind(this, this.props.slice);
+    this.exportCSV = this.props.exportCSV.bind(this, 'slice_' + this.props.slice.slice_id);
+    this.exploreChart = this.props.exploreChart.bind(this, 'slice_' + this.props.slice.slice_id);
     this.forceRefresh = this.props.forceRefresh.bind(this, this.props.slice.slice_id);
     this.toggleExpandSlice = this.props.toggleExpandSlice.bind(this, this.props.slice);
     this.toggleControls = this.toggleControls.bind(this);
 
     this.state = {
       showControls: false,
-    }
+    };
   }
 
   toggleControls() {

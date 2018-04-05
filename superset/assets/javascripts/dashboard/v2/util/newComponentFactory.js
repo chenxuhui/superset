@@ -36,7 +36,7 @@ function uuid(type) {
   return `${type}-${Math.random().toString(16)}`;
 }
 
-export default function entityFactory(type) {
+export default function entityFactory(type, meta) {
   return {
     version: 'v0',
     type,
@@ -44,6 +44,7 @@ export default function entityFactory(type) {
     children: [],
     meta: {
       ...typeToDefaultMetaData[type],
+      ...meta,
     },
   };
 }

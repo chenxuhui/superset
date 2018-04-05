@@ -22,13 +22,13 @@ const propTypes = {
 
   // redux
   layout: PropTypes.object.isRequired,
-  editMode: PropTypes.bool,
+  showBuilderPane: PropTypes.bool,
   deleteTopLevelTabs: PropTypes.func.isRequired,
   handleComponentDrop: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
-  editMode: true,
+  showBuilderPane: false,
 };
 
 class DashboardBuilder extends React.Component {
@@ -113,7 +113,9 @@ class DashboardBuilder extends React.Component {
             depth={DASHBOARD_ROOT_DEPTH + 1}
             cells={this.props.cells}
           />
-          <BuilderComponentPane />
+          {this.props.showBuilderPane &&
+            <BuilderComponentPane />
+          }
         </div>
       </div>
     );
