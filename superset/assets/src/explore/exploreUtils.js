@@ -1,5 +1,6 @@
 /* eslint camelcase: 0 */
 import URI from 'urijs';
+import { getHostName } from '../utils/hostNames';
 
 export function getChartKey(explore) {
   const slice = explore.slice;
@@ -57,7 +58,7 @@ export function getExploreUrlAndPayload({
   // The search params from the window.location are carried through,
   // but can be specified with curUrl (used for unit tests to spoof
   // the window.location).
-  let uri = new URI([location.protocol, '//', location.host].join(''));
+  let uri = new URI([location.protocol, '//', getHostName()].join(''));
   if (curUrl) {
     uri = URI(URI(curUrl).search());
   }

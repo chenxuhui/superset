@@ -2,6 +2,7 @@ import { getExploreUrlAndPayload, getAnnotationJsonUrl } from '../explore/explor
 import { requiresQuery, ANNOTATION_SOURCE_TYPES } from '../modules/AnnotationTypes';
 import { Logger, LOG_ACTIONS_LOAD_CHART } from '../logger';
 import { COMMON_ERR_MESSAGES } from '../common';
+import { allowCrossDomain } from '../utils/hostNames';
 import { t } from '../locales';
 
 const $ = (window.$ = require('jquery'));
@@ -129,7 +130,7 @@ export function runQuery(formData, force = false, timeout = 60, key) {
       force,
     });
     const logStart = Logger.getTimestamp();
-    const queryRequest = $.ajax({
+    let querySettings = {
       type: 'POST',
       url,
       dataType: 'json',
@@ -137,7 +138,21 @@ export function runQuery(formData, force = false, timeout = 60, key) {
         form_data: JSON.stringify(payload),
       },
       timeout: timeout * 1000,
-    });
+    };
+    if (allowCrossDomain) {
+      const token = (document.getElementById('csrf_token') || {}).value;
+      querySettings = {
+        ...querySettings,
+        crossDomain: true,
+        headers: {
+          'X-CSRFToken': token,
+        },
+        xhrFields: {
+          withCredentials: true,
+        },
+      };
+    }
+    const queryRequest = $.ajax(querySettings);
     const queryPromise = Promise.resolve(dispatch(chartUpdateStarted(queryRequest, payload, key)))
       .then(() => queryRequest)
       .then((queryResponse) => {
