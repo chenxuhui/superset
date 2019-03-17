@@ -22,6 +22,7 @@ Create Date: 2019-02-25 15:43:02.488328
 
 """
 import json
+import datetime
 
 from alembic import op
 from sqlalchemy import (
@@ -70,14 +71,23 @@ def upgrade():
 
     dashboards = session.query(Dashboard).all()
     for i, dashboard in enumerate(dashboards):
-        print('adding parents for dashboard layout ({}/{}) >>>>'.format(i + 1, len(dashboards)))
-        layout = json.loads(dashboard.position_json or '{}')
-        if layout and layout['ROOT_ID']:
-            add_parent_ids(layout['ROOT_ID'], layout)
+        print('adding parents for dashboard layout, id = {} ({}/{}) >>>>'.format(
+            dashboard.id,
+            i + 1,
+            len(dashboards),
+        ))
+        then = datetime.datetime.now()
+        try:
+            layout = json.loads(dashboard.position_json or '{}')
+            if layout and layout['ROOT_ID']:
+                add_parent_ids(layout['ROOT_ID'], layout)
 
-        dashboard.position_json = json.dumps(
-            layout, indent=None, separators=(',', ':'), sort_keys=True)
-        session.merge(dashboard)
+            dashboard.position_json = json.dumps(
+                layout, indent=None, separators=(',', ':'), sort_keys=True)
+            print('duration: {} microseconds'.format(int((datetime.datetime.now() - then).microseconds)))
+            session.merge(dashboard)
+        except Exception:
+            pass
 
     session.commit()
     session.close()
@@ -89,17 +99,24 @@ def downgrade():
 
     dashboards = session.query(Dashboard).all()
     for i, dashboard in enumerate(dashboards):
-        print('remove parents from dashboard layout ({}/{}) >>>>'.format(i + 1, len(dashboards)))
-        layout = json.loads(dashboard.position_json or '{}')
-        for key, item in layout.items():
-            if not isinstance(item, dict):
-                continue
-            item.pop('parents', None)
-            layout[key] = item
+        print('remove parents from dashboard layout, id = {} ({}/{}) >>>>'.format(
+            dashboard.id,
+            i + 1,
+            len(dashboards),
+        ))
+        try:
+            layout = json.loads(dashboard.position_json or '{}')
+            for key, item in layout.items():
+                if not isinstance(item, dict):
+                    continue
+                item.pop('parents', None)
+                layout[key] = item
 
             dashboard.position_json = json.dumps(
                 layout, indent=None, separators=(',', ':'), sort_keys=True)
             session.merge(dashboard)
+        except Exception:
+            pass
 
     session.commit()
     session.close()
