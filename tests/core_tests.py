@@ -148,8 +148,21 @@ class CoreTests(SupersetTestCase):
     def test_slice_json_endpoint(self):
         self.login(username='admin')
         slc = self.get_slice('Girls', db.session)
-        resp = self.get_resp(slc.explore_json_url)
+        # add mock data to trigger POST method
+        resp = self.get_resp(slc.explore_json_url, data={'test': 1})
         assert '"Jennifer"' in resp
+
+    def test_explore_json_endpoint(self):
+        self.login(username='admin')
+        slc = self.get_slice('Girls', db.session)
+
+        # by default, feature CLIENT_CACHE is disabled,
+        # explore_json should not allow GET method
+        resp = self.client.get(slc.explore_json_url)
+        self.assertEqual(resp.status_code, 405)
+
+        resp = self.client.post(slc.explore_json_url)
+        self.assertEqual(resp.status_code, 200)
 
     def test_old_slice_csv_endpoint(self):
         self.login(username='admin')
@@ -751,7 +764,8 @@ class CoreTests(SupersetTestCase):
         slc = self.get_slice('Title', db.session)
 
         url = slc.get_explore_url(base_url='/superset/explore_json')
-        data = self.get_json_resp(url)
+        # add mock data to trigger POST method
+        data = self.get_json_resp(url, data={'test': 1})
         self.assertEqual(data['status'], None)
         self.assertEqual(data['error'], None)
 
