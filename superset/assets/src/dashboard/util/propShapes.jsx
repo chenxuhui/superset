@@ -35,6 +35,9 @@ export const componentShape = PropTypes.shape({
 
     // Row
     background: PropTypes.oneOf(backgroundStyleOptions.map(opt => opt.value)),
+
+    // Chart
+    chartId: PropTypes.number,
   }),
 });
 
