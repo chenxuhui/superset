@@ -36,6 +36,8 @@ import {
   GRID_BASE_UNIT,
   GRID_GUTTER_SIZE,
 } from '../../util/constants';
+import FilterScopeModal from '../FilterScopeModal'
+import { isFilterBox } from '../../util/activeDashboardFilters'
 
 const CHART_MARGIN = 32;
 
@@ -112,6 +114,7 @@ class ChartHolder extends React.Component {
     this.handleChangeFocus = this.handleChangeFocus.bind(this);
     this.handleDeleteComponent = this.handleDeleteComponent.bind(this);
     this.handleUpdateSliceName = this.handleUpdateSliceName.bind(this);
+    this.handleSaveFilterScope = this.handleSaveFilterScope.bind(this);
   }
 
   componentDidMount() {
@@ -157,6 +160,10 @@ class ChartHolder extends React.Component {
         },
       },
     });
+  }
+
+  handleSaveFilterScope() {
+    console.log('i am chart holder onSave');
   }
 
   render() {
@@ -245,6 +252,14 @@ class ChartHolder extends React.Component {
               )}
               {editMode && (
                 <HoverMenu position="top">
+                  {isFilterBox(component.meta.chartId) && (
+                    <FilterScopeModal
+                      triggerNode={<span className="fa fa-cog" />}
+                      chartId={component.meta.chartId}
+                      componentId={component.id}
+                      onSave={this.handleSaveFilterScope}
+                    />
+                  )}
                   <DeleteComponentButton
                     onDelete={this.handleDeleteComponent}
                   />

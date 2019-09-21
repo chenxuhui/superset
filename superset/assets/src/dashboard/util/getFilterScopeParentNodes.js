@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-@import './variables.less';
+export default function getFilterScopeParentNodes(nodes) {
+  function traverse(currentNode) {
+    if (!currentNode) {
+      return;
+    }
 
-@import './builder.less';
-@import './builder-sidepane.less';
-@import './buttons.less';
-@import './dashboard.less';
-@import './dnd.less';
-@import './filter-scope-selector.less';
-@import './filter-indicator.less';
-@import './filter-indicator-tooltip.less';
-@import './grid.less';
-@import './hover-menu.less';
-@import './popover-menu.less';
-@import './resizable.less';
-@import './components/index.less';
+    if (currentNode.children) {
+      parentNodes.push(currentNode.value);
+      currentNode.children.forEach(child => (traverse(child)));
+    }
+  }
+
+  const parentNodes = [];
+  if (nodes && nodes.length) {
+    nodes.forEach(node => {
+      traverse(node);
+    });
+  }
+
+  return parentNodes;
+}
