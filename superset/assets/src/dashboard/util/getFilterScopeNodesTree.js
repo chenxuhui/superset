@@ -20,12 +20,12 @@ import { DASHBOARD_ROOT_ID } from './constants';
 import { CHART_TYPE, DASHBOARD_ROOT_TYPE, TAB_TYPE } from '../util/componentTypes'
 import { isFilterBox } from '../util/activeDashboardFilters'
 
-const FILTER_SCOPE_NODE_TYPES = [
+const FILTER_SCOPE_CONTAINER_TYPES = [
   TAB_TYPE,
   DASHBOARD_ROOT_TYPE,
 ];
 
-export default function getFilterScopeNodesTree(components = {}) {
+export default function getFilterScopeNodesTree(components = {}, currentFilterChartId) {
   function traverse(currentNode) {
     if (!currentNode) {
       return;
@@ -34,13 +34,14 @@ export default function getFilterScopeNodesTree(components = {}) {
     const type = currentNode.type;
     if (
       CHART_TYPE === type &&
-      currentNode.meta.chartId &&
-      !isFilterBox(currentNode.meta.chartId)
+      currentNode.meta.chartId
+      // && !isFilterBox(currentNode.meta.chartId)
     ) {
       return {
         value: currentNode.meta.chartId,
         label: currentNode.meta.sliceName || `${type} ${currentNode.meta.chartId}`,
         // showCheckbox: false,
+        showCheckbox: currentNode.meta.chartId !== currentFilterChartId,
       }
     }
 
@@ -50,7 +51,7 @@ export default function getFilterScopeNodesTree(components = {}) {
         const cNode = traverse(components[child]);
 
         const childType = components[child].type;
-        if (FILTER_SCOPE_NODE_TYPES.includes(childType)) {
+        if (FILTER_SCOPE_CONTAINER_TYPES.includes(childType)) {
           children.push(cNode);
         } else {
           children = children.concat(cNode);
@@ -58,7 +59,7 @@ export default function getFilterScopeNodesTree(components = {}) {
       });
     }
 
-    if (FILTER_SCOPE_NODE_TYPES.includes(type)) {
+    if (FILTER_SCOPE_CONTAINER_TYPES.includes(type)) {
       return {
         value: currentNode.id,
         label: type === DASHBOARD_ROOT_TYPE ? 'All dashboard' :

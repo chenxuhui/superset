@@ -80,12 +80,6 @@
   .react-checkbox-tree {
     font-size: 14px;
 
-    .rct-node-parent {
-      .rct-title {
-        font-weight: 700;
-      }
-    }
-
     .rct-checkbox {
       svg {
         position: relative;
@@ -97,11 +91,27 @@
       .rct-title {
         font-weight: 400;
       }
+
+      .rct-bare-label {
+        &::before {
+          padding-left: 5px;
+          content: "Current filter: ";
+        }
+
+        .rct-title {
+          font-weight: 700;
+          font-style: italic;
+        }
+      }
     }
 
     .rct-options {
       position: absolute;
       right: 24px;
+    }
+
+    .rct-title {
+      font-weight: 700;
     }
   }
 }

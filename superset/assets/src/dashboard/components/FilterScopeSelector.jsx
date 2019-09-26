@@ -22,8 +22,8 @@ import { Tabs, Tab, TabContent, Nav, NavItem } from 'react-bootstrap';
 
 import getFilterScopeNodesTree from '../util/getFilterScopeNodesTree';
 import getFilterScopeParentNodes from '../util/getFilterScopeParentNodes';
+import getCurrentScopeChartIds from '../util/getCurrentScopeChartIds';
 import FilterScopeTree from './FilterScopeTree'
-import { CHART_TYPE, TAB_TYPE } from '../util/componentTypes'
 import {
   getFilterColorKey,
   getFilterColorMap,
@@ -46,39 +46,53 @@ export default class FilterScopeSelector extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const { filterConfig, layout } = props;
-    const allChartIds = Object.values(layout)
-      .filter(component => (component.type === CHART_TYPE))
-      .map(chart => (chart.meta.chartId));
-    const nodes = getFilterScopeNodesTree(layout);
-    const allParentIds = getFilterScopeParentNodes(nodes);
+    const {
+      filterConfig,
+      filterImmuneSlices,
+      filterImmuneSliceFields,
+      layout,
+      chartId,
+    } = props;
 
-    const { columns } = filterConfig;
+    // display checkbox tree of whole dashboard scope
+    const nodes = getFilterScopeNodesTree(layout, chartId);
+    const expanded = getFilterScopeParentNodes(nodes, 1);
+    const { columns, scope = nodes } = filterConfig;
+
     this.filterKeys = Object.keys(columns);
     const activeKey = this.filterKeys.length ? this.filterKeys[0] : '';
-    this.filterScopeMap = this.filterKeys.reduce((map, key) => {
-      return {
+    const filterScopeMap = this.filterKeys.reduce(
+      (map, key) => ({
         ...map,
         [key]: {
-          nodes,                         // unfiltered nodes
-          nodesFiltered: nodes.slice(),  // filtered nodes if searchText is not empty
-          checked: allChartIds,
-          expanded: allParentIds,
+          // unfiltered nodes
+          nodes,
+          // filtered nodes in display if searchText is not empty
+          nodesFiltered: nodes.slice(),
+          checked: getCurrentScopeChartIds({
+            scopeComponentIds: scope,
+            filterField: key,
+            filterImmuneSlices,
+            filterImmuneSliceFields,
+            components: layout,
+          }),
+          expanded,
         },
-      }
-    }, {});
+      }),
+      {},
+    );
 
     this.state = {
       activeKey,
       searchText: '',
-      filterScopeMap: this.filterScopeMap,
+      filterScopeMap,
     };
 
     this.filterNodes = this.filterNodes.bind(this);
     this.onChangeTab = this.onChangeTab.bind(this);
     this.onCheck = this.onCheck.bind(this);
     this.onExpand = this.onExpand.bind(this);
-    this.onFilterChange = this.onFilterChange.bind(this);
+    this.onSearchInputChange = this.onSearchInputChange.bind(this);
   }
 
   onCheck(checked) {
@@ -86,7 +100,7 @@ export default class FilterScopeSelector extends React.PureComponent {
     const updatedEntry = {
       ...filterScopeMap[activeKey],
       checked,
-    }
+    };
     this.setState(() => ({
       filterScopeMap: {
         ...filterScopeMap,
@@ -109,7 +123,7 @@ export default class FilterScopeSelector extends React.PureComponent {
     }));
   }
 
-  onFilterChange(e) {
+  onSearchInputChange(e) {
     this.setState({ searchText: e.target.value }, this.filterTree);
   }
 
@@ -190,7 +204,7 @@ export default class FilterScopeSelector extends React.PureComponent {
             placeholder="Search..."
             type="text"
             value={searchText}
-            onChange={this.onFilterChange}
+            onChange={this.onSearchInputChange}
           />
         </div>
 
