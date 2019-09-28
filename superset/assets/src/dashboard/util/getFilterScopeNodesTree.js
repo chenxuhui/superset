@@ -25,7 +25,10 @@ const FILTER_SCOPE_CONTAINER_TYPES = [
   DASHBOARD_ROOT_TYPE,
 ];
 
-export default function getFilterScopeNodesTree(components = {}, currentFilterChartId) {
+export default function getFilterScopeNodesTree(
+  components = {},
+  currentFilterChartId,
+) {
   function traverse(currentNode) {
     if (!currentNode) {
       return;
@@ -39,10 +42,11 @@ export default function getFilterScopeNodesTree(components = {}, currentFilterCh
     ) {
       return {
         value: currentNode.meta.chartId,
-        label: currentNode.meta.sliceName || `${type} ${currentNode.meta.chartId}`,
+        label:
+          currentNode.meta.sliceName || `${type} ${currentNode.meta.chartId}`,
         // showCheckbox: false,
         showCheckbox: currentNode.meta.chartId !== currentFilterChartId,
-      }
+      };
     }
 
     let children = [];
@@ -72,11 +76,13 @@ export default function getFilterScopeNodesTree(components = {}, currentFilterCh
   }
 
   if (Object.keys(components).length === 0) {
-      return [];
+    return [];
   }
 
   const root = traverse(components[DASHBOARD_ROOT_ID]);
-  return [{
-    ...root,
-  }];
+  return [
+    {
+      ...root,
+    },
+  ];
 }

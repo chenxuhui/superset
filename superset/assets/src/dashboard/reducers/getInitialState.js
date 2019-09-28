@@ -30,6 +30,7 @@ import { buildActiveFilters } from '../util/activeDashboardFilters';
 import {
   BUILDER_PANE_TYPE,
   DASHBOARD_HEADER_ID,
+  DASHBOARD_ROOT_ID,
   GRID_DEFAULT_CHART_WIDTH,
   GRID_COLUMN_COUNT,
 } from '../util/constants';
@@ -97,6 +98,21 @@ export default function(bootstrapData) {
   const parent = layout[parentId];
   let newSlicesContainer;
   let newSlicesContainerWidth = 0;
+
+  // filter scopes
+  const filterImmuneSliceFields = dashboard.metadata
+    .filter_immune_slice_fields || {
+    '97': ['country_name'],
+  };
+  const filterImmuneSlices = dashboard.metadata.filter_immune_slices || [];
+  const filterScopes = dashboard.metadata.filter_scopes || {
+    '108': {
+      __time_range: {
+        scope: ['TAB-oMbymVL_s'],
+        immune: [105],
+      },
+    },
+  };
 
   const chartQueries = {};
   const dashboardFilters = {};
@@ -173,6 +189,36 @@ export default function(bootstrapData) {
           });
         }
 
+        // backward compatible: merge scoped filter settings with global immune settings
+        const scopeByChartId = filterScopes[key] || {};
+        const scopesByColumnName = Object.keys(columns).reduce(
+          (map, column) => {
+            const scopeForField = scopeByChartId[column] || {
+              scope: [DASHBOARD_ROOT_ID],
+              immune: [],
+            };
+
+            const immuneChartIds = new Set(filterImmuneSlices.slice());
+            if (Object.keys(filterImmuneSliceFields).length) {
+              Object.keys(filterImmuneSliceFields).forEach(strChartId => {
+                if (filterImmuneSliceFields[strChartId].includes(column)) {
+                  immuneChartIds.add(parseInt(strChartId, 10));
+                }
+              });
+            }
+
+            const currentEntry = {
+              scope: scopeForField.scope,
+              immune: [...immuneChartIds].concat(scopeForField.immune),
+            };
+            return {
+              ...map,
+              [column]: currentEntry,
+            };
+          },
+          {},
+        );
+
         const componentId = chartIdToLayoutId[key];
         const directPathToFilter = (layout[componentId].parents || []).slice();
         directPathToFilter.push(componentId);
@@ -183,6 +229,7 @@ export default function(bootstrapData) {
           directPathToFilter,
           columns,
           labels,
+          scopes: scopesByColumnName,
           isInstantFilter: !!slice.form_data.instant_filtering,
           isDateFilter: Object.keys(columns).includes(TIME_RANGE),
         };
@@ -232,9 +279,6 @@ export default function(bootstrapData) {
       id: dashboard.id,
       slug: dashboard.slug,
       metadata: {
-        filterImmuneSliceFields:
-          dashboard.metadata.filter_immune_slice_fields || {},
-        filterImmuneSlices: dashboard.metadata.filter_immune_slices || [],
         timed_refresh_immune_slices:
           dashboard.metadata.timed_refresh_immune_slices,
       },

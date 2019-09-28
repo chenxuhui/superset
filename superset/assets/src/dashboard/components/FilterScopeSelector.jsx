@@ -139,7 +139,7 @@ export default class FilterScopeSelector extends React.PureComponent {
         const updatedEntry = {
           ...filterScopeMap[activeKey],
           nodesFiltered: filterScopeMap[activeKey].nodes,
-        }
+        };
         return {
           filterScopeMap: {
             ...filterScopeMap,
@@ -157,7 +157,7 @@ export default class FilterScopeSelector extends React.PureComponent {
       const updatedEntry = {
         ...filterScopeMap[activeKey],
         nodesFiltered,
-      }
+      };
       return {
         filterScopeMap: {
           ...filterScopeMap,
