@@ -23,6 +23,7 @@ import { isEmpty } from 'lodash';
 import FilterIndicator from './FilterIndicator';
 import FilterIndicatorGroup from './FilterIndicatorGroup';
 import { FILTER_INDICATORS_DISPLAY_LENGTH } from '../util/constants';
+import getChartIdsInFilterScope from '../util/getChartIdsInFilterScope';
 import {
   getFilterColorKey,
   getFilterColorMap,
@@ -33,10 +34,9 @@ const propTypes = {
   dashboardFilters: PropTypes.object.isRequired,
   chartId: PropTypes.number.isRequired,
   chartStatus: PropTypes.string,
+  layout: PropTypes.object.isRequired,
 
   // from redux
-  filterImmuneSlices: PropTypes.arrayOf(PropTypes.number).isRequired,
-  filterImmuneSliceFields: PropTypes.object.isRequired,
   setDirectPathToChild: PropTypes.func.isRequired,
   filterFieldOnFocus: PropTypes.object.isRequired,
 };
@@ -61,9 +61,8 @@ export default class FilterIndicatorsContainer extends React.PureComponent {
     const {
       dashboardFilters,
       chartId: currentChartId,
-      filterImmuneSlices,
-      filterImmuneSliceFields,
       filterFieldOnFocus,
+      layout: components,
     } = this.props;
 
     if (Object.keys(dashboardFilters).length === 0) {
@@ -78,20 +77,26 @@ export default class FilterIndicatorsContainer extends React.PureComponent {
           chartId,
           componentId,
           directPathToFilter,
-          scope,
           isDateFilter,
           isInstantFilter,
           columns,
           labels,
+          scopes,
         } = dashboardFilter;
 
         // do not apply filter on filter_box itself
-        // do not apply filter on filterImmuneSlices list
-        if (
-          currentChartId !== chartId &&
-          !filterImmuneSlices.includes(currentChartId)
-        ) {
+        // do not apply filter on filterImmuneSlices list or filterImmuneSliceFields
+        if (currentChartId !== chartId) {
           Object.keys(columns).forEach(name => {
+            const chartIdsInFilterScope = getChartIdsInFilterScope({
+              filterScope: scopes[name],
+              components,
+            });
+
+            if (!chartIdsInFilterScope.includes(currentChartId)) {
+              return;
+            }
+
             const colorMapKey = getFilterColorKey(chartId, name);
             const directPathToLabel = directPathToFilter.slice();
             directPathToLabel.push(`LABEL-${name}`);
@@ -100,7 +105,6 @@ export default class FilterIndicatorsContainer extends React.PureComponent {
               colorCode: dashboardFiltersColorMap[colorMapKey],
               componentId,
               directPathToFilter: directPathToLabel,
-              scope,
               isDateFilter,
               isInstantFilter,
               name,
@@ -114,14 +118,6 @@ export default class FilterIndicatorsContainer extends React.PureComponent {
                 chartId === filterFieldOnFocus.chartId &&
                 name === filterFieldOnFocus.column,
             };
-
-            // do not apply filter on fields in the filterImmuneSliceFields map
-            if (
-              filterImmuneSliceFields[currentChartId] &&
-              filterImmuneSliceFields[currentChartId].includes(name)
-            ) {
-              return;
-            }
 
             if (isEmpty(indicator.values)) {
               indicators[1].push(indicator);

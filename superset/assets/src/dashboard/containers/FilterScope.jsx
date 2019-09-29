@@ -20,23 +20,17 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import { setDirectPathToChild } from '../actions/dashboardState';
-import FilterScopeSelector from '../components/FilterScopeSelector'
+import FilterScopeSelector from '../components/FilterScopeSelector';
 
-function mapStateToProps(
-  { dashboardLayout, dashboardFilters, dashboardInfo },
-  ownProps,
-) {
+function mapStateToProps({ dashboardLayout, dashboardFilters }, ownProps) {
   const chartId = ownProps.chartId;
   const componentId = ownProps.componentId;
 
   return {
     chartId,
     componentId,
-    filterConfig: dashboardFilters[chartId],
-    filterImmuneSlices: dashboardInfo.metadata.filterImmuneSlices || [],
-    filterImmuneSliceFields:
-      dashboardInfo.metadata.filterImmuneSliceFields || {},
-    layout:  dashboardLayout.present,
+    dashboardFilter: dashboardFilters[chartId],
+    layout: dashboardLayout.present,
   };
 }
 

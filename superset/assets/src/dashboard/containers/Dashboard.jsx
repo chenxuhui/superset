@@ -27,7 +27,6 @@ import {
 } from '../actions/dashboardState';
 import { triggerQuery } from '../../chart/chartAction';
 import { logEvent } from '../../logger/actions';
-import getLoadStatsPerTopLevelComponent from '../util/logging/getLoadStatsPerTopLevelComponent';
 import { getActiveFilters } from '../util/activeDashboardFilters';
 
 function mapStateToProps(state) {
@@ -57,10 +56,6 @@ function mapStateToProps(state) {
     slices: sliceEntities.slices,
     layout: dashboardLayout.present,
     impressionId,
-    loadStats: getLoadStatsPerTopLevelComponent({
-      layout: dashboardLayout.present,
-      chartQueries: charts,
-    }),
   };
 }
 

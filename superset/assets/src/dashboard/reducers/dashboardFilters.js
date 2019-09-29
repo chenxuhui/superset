@@ -24,9 +24,15 @@ import {
   UPDATE_DIRECT_PATH_TO_FILTER,
 } from '../actions/dashboardFilters';
 import { TIME_RANGE } from '../../visualizations/FilterBox/FilterBox';
+import { DASHBOARD_ROOT_ID } from '../util/constants';
 import getFilterConfigsFromFormdata from '../util/getFilterConfigsFromFormdata';
 import { buildFilterColorMap } from '../util/dashboardFiltersColorMap';
 import { buildActiveFilters } from '../util/activeDashboardFilters';
+
+export const DASHBOARD_FILTER_SCOPE_GLOBAL = {
+  scope: [DASHBOARD_ROOT_ID],
+  immune: [],
+};
 
 export const dashboardFilter = {
   chartId: 0,
@@ -55,6 +61,13 @@ export default function dashboardFiltersReducer(dashboardFilters = {}, action) {
         directPathToFilter,
         columns,
         labels,
+        scopes: Object.keys(columns).reduce(
+          (map, column) => ({
+            ...map,
+            [column]: DASHBOARD_FILTER_SCOPE_GLOBAL,
+          }),
+          {},
+        ),
         isInstantFilter: !!form_data.instant_filtering,
         isDateFilter: Object.keys(columns).includes(TIME_RANGE),
       };

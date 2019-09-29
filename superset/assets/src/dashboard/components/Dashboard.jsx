@@ -28,7 +28,6 @@ import {
   slicePropShape,
   dashboardInfoPropShape,
   dashboardStatePropShape,
-  loadStatsPropShape,
 } from '../util/propShapes';
 import { areObjectsEqual } from '../../reduxUtils';
 import { LOG_ACTIONS_MOUNT_DASHBOARD } from '../../logger/LogUtils';
@@ -50,7 +49,6 @@ const propTypes = {
   slices: PropTypes.objectOf(slicePropShape).isRequired,
   filters: PropTypes.object.isRequired,
   datasources: PropTypes.object.isRequired,
-  loadStats: loadStatsPropShape.isRequired,
   layout: PropTypes.object.isRequired,
   impressionId: PropTypes.string.isRequired,
   initMessages: PropTypes.array,

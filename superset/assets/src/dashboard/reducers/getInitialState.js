@@ -22,7 +22,10 @@ import shortid from 'shortid';
 import { CategoricalColorNamespace } from '@superset-ui/color';
 
 import { chart } from '../../chart/chartReducer';
-import { dashboardFilter } from './dashboardFilters';
+import {
+  DASHBOARD_FILTER_SCOPE_GLOBAL,
+  dashboardFilter,
+} from './dashboardFilters';
 import { initSliceEntities } from './sliceEntities';
 import { getParam } from '../../modules/utils';
 import { applyDefaultFormData } from '../../explore/store';
@@ -30,7 +33,6 @@ import { buildActiveFilters } from '../util/activeDashboardFilters';
 import {
   BUILDER_PANE_TYPE,
   DASHBOARD_HEADER_ID,
-  DASHBOARD_ROOT_ID,
   GRID_DEFAULT_CHART_WIDTH,
   GRID_COLUMN_COUNT,
 } from '../util/constants';
@@ -102,9 +104,9 @@ export default function(bootstrapData) {
   // filter scopes
   const filterImmuneSliceFields = dashboard.metadata
     .filter_immune_slice_fields || {
-    '97': ['country_name'],
+    '108': ['country_name'],
   };
-  const filterImmuneSlices = dashboard.metadata.filter_immune_slices || [];
+  const filterImmuneSlices = dashboard.metadata.filter_immune_slices || [107];
   const filterScopes = dashboard.metadata.filter_scopes || {
     '108': {
       __time_range: {
@@ -193,10 +195,8 @@ export default function(bootstrapData) {
         const scopeByChartId = filterScopes[key] || {};
         const scopesByColumnName = Object.keys(columns).reduce(
           (map, column) => {
-            const scopeForField = scopeByChartId[column] || {
-              scope: [DASHBOARD_ROOT_ID],
-              immune: [],
-            };
+            const scopeForColumn = scopeByChartId[column] ||
+              DASHBOARD_FILTER_SCOPE_GLOBAL;
 
             const immuneChartIds = new Set(filterImmuneSlices.slice());
             if (Object.keys(filterImmuneSliceFields).length) {
@@ -207,13 +207,12 @@ export default function(bootstrapData) {
               });
             }
 
-            const currentEntry = {
-              scope: scopeForField.scope,
-              immune: [...immuneChartIds].concat(scopeForField.immune),
-            };
             return {
               ...map,
-              [column]: currentEntry,
+              [column]: {
+                scope: scopeForColumn.scope,
+                immune: [...immuneChartIds].concat(scopeForColumn.immune),
+              },
             };
           },
           {},

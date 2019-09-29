@@ -19,14 +19,8 @@
 
 import { CHART_TYPE } from '../util/componentTypes';
 
-export default function getCurrentScopeChartIds({
-  scopeComponentIds,
-  filterField,
-  filterImmuneSlices,
-  filterImmuneSliceFields,
-  components,
-}) {
-  function traverse(component) {
+export default function getChartIdsInFilterScope({ filterScope, components }) {
+  function traverse(chartIds, component, immuneChartIds) {
     if (!component) {
       return;
     }
@@ -34,27 +28,22 @@ export default function getCurrentScopeChartIds({
     if (
       component.type === CHART_TYPE &&
       component.meta &&
-      component.meta.chartId
+      component.meta.chartId &&
+      !immuneChartIds.includes(component.meta.chartId)
     ) {
       chartIds.push(component.meta.chartId);
     } else if (component.children) {
-      component.children.forEach(child => traverse(components[child]));
+      component.children.forEach(child =>
+        traverse(chartIds, components[child], immuneChartIds),
+      );
     }
   }
 
-  let chartIds = [];
-  scopeComponentIds.forEach(componentId => (traverse(components[componentId])));
-
-  if (filterImmuneSlices && filterImmuneSlices.length) {
-    chartIds = chartIds.filter(id => !filterImmuneSlices.includes(id));
-  }
-
-  if (filterImmuneSliceFields) {
-    chartIds = chartIds.filter(id =>
-      !(id.toString() in filterImmuneSliceFields) ||
-      !filterImmuneSliceFields[id].includes(filterField)
-    );
-  }
+  const chartIds = [];
+  const { scope: scopeComponentIds, immune: immuneChartIds } = filterScope;
+  scopeComponentIds.forEach(componentId =>
+    traverse(chartIds, components[componentId], immuneChartIds),
+  );
 
   return chartIds;
 }

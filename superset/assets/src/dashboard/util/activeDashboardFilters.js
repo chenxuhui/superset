@@ -32,9 +32,12 @@ export function isFilterBox(chartId) {
 }
 
 // non-empty filters from dashboardFilters,
+// this is current filter values' state in the dashboard (field name and selected values),
 // this function does not take into account: filter immune or filter scope settings
 export function buildActiveFilters(allDashboardFilters = {}) {
-  allFilterIds = Object.values(allDashboardFilters).map(filter => filter.chartId);
+  allFilterIds = Object.values(allDashboardFilters).map(
+    filter => filter.chartId,
+  );
 
   activeFilters = Object.values(allDashboardFilters).reduce(
     (result, filter) => {

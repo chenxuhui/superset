@@ -20,44 +20,37 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, TabContent, Nav, NavItem } from 'react-bootstrap';
 
+import getChartIdsInFilterScope from '../util/getChartIdsInFilterScope';
 import getFilterScopeNodesTree from '../util/getFilterScopeNodesTree';
 import getFilterScopeParentNodes from '../util/getFilterScopeParentNodes';
-import getCurrentScopeChartIds from '../util/getCurrentScopeChartIds';
-import FilterScopeTree from './FilterScopeTree'
+import FilterScopeTree from './FilterScopeTree';
 import {
   getFilterColorKey,
   getFilterColorMap,
 } from '../util/dashboardFiltersColorMap';
-import FilterBadgeIcon from '../../components/FilterBadgeIcon'
+import { dashboardFilterPropShape } from '../util/propShapes';
+import FilterBadgeIcon from '../../components/FilterBadgeIcon';
 
 const propTypes = {
   layout: PropTypes.object.isRequired,
-  filterImmuneSlices: PropTypes.arrayOf(PropTypes.number).isRequired,
-  filterImmuneSliceFields: PropTypes.object.isRequired,
   setDirectPathToChild: PropTypes.func.isRequired,
 
   // user selected filter:
   chartId: PropTypes.number.isRequired,
   componentId: PropTypes.string.isRequired,
-  filterConfig: PropTypes.object.isRequired,
+  dashboardFilter: dashboardFilterPropShape.isRequired,
 };
 
 export default class FilterScopeSelector extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const {
-      filterConfig,
-      filterImmuneSlices,
-      filterImmuneSliceFields,
-      layout,
-      chartId,
-    } = props;
+    const { dashboardFilter, layout, chartId } = props;
 
-    // display checkbox tree of whole dashboard scope
+    // display checkbox tree of whole dashboard
     const nodes = getFilterScopeNodesTree(layout, chartId);
     const expanded = getFilterScopeParentNodes(nodes, 1);
-    const { columns, scope = nodes } = filterConfig;
+    const { columns, scopes } = dashboardFilter;
 
     this.filterKeys = Object.keys(columns);
     const activeKey = this.filterKeys.length ? this.filterKeys[0] : '';
@@ -69,11 +62,9 @@ export default class FilterScopeSelector extends React.PureComponent {
           nodes,
           // filtered nodes in display if searchText is not empty
           nodesFiltered: nodes.slice(),
-          checked: getCurrentScopeChartIds({
-            scopeComponentIds: scope,
-            filterField: key,
-            filterImmuneSlices,
-            filterImmuneSliceFields,
+          // chartIds that filter can apply to
+          checked: getChartIdsInFilterScope({
+            filterScope: scopes[key],
             components: layout,
           }),
           expanded,
@@ -114,7 +105,7 @@ export default class FilterScopeSelector extends React.PureComponent {
     const updatedEntry = {
       ...filterScopeMap[activeKey],
       expanded,
-    }
+    };
     this.setState(() => ({
       filterScopeMap: {
         ...filterScopeMap,
@@ -153,7 +144,10 @@ export default class FilterScopeSelector extends React.PureComponent {
 
     const updater = prevState => {
       const { activeKey, filterScopeMap } = prevState;
-      const nodesFiltered = filterScopeMap[activeKey].nodes.reduce(this.filterNodes, []);
+      const nodesFiltered = filterScopeMap[activeKey].nodes.reduce(
+        this.filterNodes,
+        [],
+      );
       const updatedEntry = {
         ...filterScopeMap[activeKey],
         nodesFiltered,
@@ -175,7 +169,8 @@ export default class FilterScopeSelector extends React.PureComponent {
 
     if (
       // Node's label matches the search string
-      node.label.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) > -1 ||
+      node.label.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase()) >
+        -1 ||
       // Or a children has a matching node
       children.length
     ) {
@@ -186,13 +181,9 @@ export default class FilterScopeSelector extends React.PureComponent {
   }
 
   render() {
-    const {
-      activeKey,
-      searchText,
-      filterScopeMap,
-    } = this.state;
-    const { chartId, filterConfig } = this.props;
-    const { labels } = filterConfig;
+    const { activeKey, searchText, filterScopeMap } = this.state;
+    const { chartId, dashboardFilter } = this.props;
+    const { labels } = dashboardFilter;
     const dashboardFiltersColorMap = getFilterColorMap();
 
     return (
@@ -217,11 +208,7 @@ export default class FilterScopeSelector extends React.PureComponent {
           unmountOnExit={false}
         >
           <div className="filters-scope-selector">
-            <Nav
-              className="nav-bar"
-              bsStyle="pills"
-              stacked
-            >
+            <Nav className="nav-bar" bsStyle="pills" stacked>
               {this.filterKeys.map(key => {
                 const colorKey = getFilterColorKey(chartId, key);
                 const colorCode = dashboardFiltersColorMap[colorKey];
@@ -232,23 +219,23 @@ export default class FilterScopeSelector extends React.PureComponent {
                     className="filter-key-container"
                     title={labels[key]}
                   >
-                      <FilterBadgeIcon
-                        colorCode={colorCode}
-                      />
-                    <label>{labels[key] || key}</label>
-                </NavItem>);
+                    <FilterBadgeIcon colorCode={colorCode} />
+                    <label htmlFor={`LABEL-${key}`}>{labels[key] || key}</label>
+                  </NavItem>
+                );
               })}
             </Nav>
             <TabContent animation>
               {this.filterKeys.map(key => (
                 <Tab eventKey={key}>
-                  {<FilterScopeTree
-                    nodes={filterScopeMap[key].nodesFiltered}
-                    checked={filterScopeMap[key].checked}
-                    expanded={filterScopeMap[key].expanded}
-                    onCheck={this.onCheck}
-                    onExpand={this.onExpand}
-                  />
+                  {
+                    <FilterScopeTree
+                      nodes={filterScopeMap[key].nodesFiltered}
+                      checked={filterScopeMap[key].checked}
+                      expanded={filterScopeMap[key].expanded}
+                      onCheck={this.onCheck}
+                      onExpand={this.onExpand}
+                    />
                   }
                 </Tab>
               ))}
@@ -256,7 +243,7 @@ export default class FilterScopeSelector extends React.PureComponent {
           </div>
         </Tabs>
       </div>
-    )
+    );
   }
 }
 
