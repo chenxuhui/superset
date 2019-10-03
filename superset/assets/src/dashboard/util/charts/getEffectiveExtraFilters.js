@@ -16,45 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export default function getEffectiveExtraFilters({
-  dashboardMetadata,
-  filters,
-  sliceId,
-}) {
-  const immuneSlices = dashboardMetadata.filterImmuneSlices || [];
-
-  if (sliceId && immuneSlices.includes(sliceId)) {
-    // The slice is immune to dashboard filters
-    return [];
-  }
-
-  // Build a list of fields the slice is immune to filters on
+export default function getEffectiveExtraFilters(filters) {
   const effectiveFilters = [];
-  let immuneToFields = [];
-  if (
-    sliceId &&
-    dashboardMetadata.filterImmuneSliceFields &&
-    dashboardMetadata.filterImmuneSliceFields[sliceId]
-  ) {
-    immuneToFields = dashboardMetadata.filterImmuneSliceFields[sliceId];
-  }
-
-  Object.keys(filters).forEach(filteringSliceId => {
-    if (filteringSliceId === sliceId.toString()) {
-      // Filters applied by the slice don't apply to itself
-      return;
-    }
-    const filtersFromSlice = filters[filteringSliceId];
-    Object.keys(filtersFromSlice).forEach(field => {
-      if (!immuneToFields.includes(field)) {
-        effectiveFilters.push({
-          col: field,
-          op: 'in',
-          val: filtersFromSlice[field],
-        });
-      }
+  Object.keys(filters).forEach(field => {
+    effectiveFilters.push({
+      col: field,
+      op: 'in',
+      val: filters[field],
     });
   });
-
   return effectiveFilters;
 }

@@ -64,6 +64,7 @@ export default class FilterScopeSelector extends React.PureComponent {
           nodesFiltered: nodes.slice(),
           // chartIds that filter can apply to
           checked: getChartIdsInFilterScope({
+            filterId: chartId,
             filterScope: scopes[key],
             components: layout,
           }),

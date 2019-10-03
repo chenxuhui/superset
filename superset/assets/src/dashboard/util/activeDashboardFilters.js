@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-let activeFilters = {};
+const activeFilterFields = {};
+let activeFilterValues = {};
 let allFilterIds = [];
 
-export function getActiveFilters() {
-  return activeFilters;
+export function getActiveFilterValues() {
+  return activeFilterValues;
+}
+
+export function getActiveFilterFields() {
+  return activeFilterFields;
 }
 
 // currently filterbox is a chart,
@@ -31,24 +36,24 @@ export function isFilterBox(chartId) {
   return allFilterIds.includes(chartId);
 }
 
-// non-empty filters from dashboardFilters,
-// this is current filter values' state in the dashboard (field name and selected values),
-// this function does not take into account: filter immune or filter scope settings
+// non-empty filter fields from dashboardFilters
 export function buildActiveFilters(allDashboardFilters = {}) {
   allFilterIds = Object.values(allDashboardFilters).map(
     filter => filter.chartId,
   );
 
-  activeFilters = Object.values(allDashboardFilters).reduce(
+  activeFilterValues = Object.values(allDashboardFilters).reduce(
     (result, filter) => {
       const { chartId, columns } = filter;
 
+      const activeFieldNames = [];
       Object.keys(columns).forEach(key => {
         if (
           Array.isArray(columns[key])
             ? columns[key].length
             : columns[key] !== undefined
         ) {
+          activeFieldNames.push(key);
           /* eslint-disable no-param-reassign */
           result[chartId] = {
             ...result[chartId],
@@ -57,6 +62,9 @@ export function buildActiveFilters(allDashboardFilters = {}) {
         }
       });
 
+      if (activeFieldNames.length) {
+        activeFilterFields[chartId] = activeFieldNames;
+      }
       return result;
     },
     {},

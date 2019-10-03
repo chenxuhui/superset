@@ -48,6 +48,7 @@ import getFilterConfigsFromFormdata from '../util/getFilterConfigsFromFormdata';
 import getLocationHash from '../util/getLocationHash';
 import newComponentFactory from '../util/newComponentFactory';
 import { TIME_RANGE } from '../../visualizations/FilterBox/FilterBox';
+import getChartIdsInFilterScope from "../util/getChartIdsInFilterScope";
 
 export default function(bootstrapData) {
   const { user_id, datasources, common, editMode } = bootstrapData;
@@ -195,8 +196,8 @@ export default function(bootstrapData) {
         const scopeByChartId = filterScopes[key] || {};
         const scopesByColumnName = Object.keys(columns).reduce(
           (map, column) => {
-            const scopeForColumn = scopeByChartId[column] ||
-              DASHBOARD_FILTER_SCOPE_GLOBAL;
+            const scopeForColumn =
+              scopeByChartId[column] || DASHBOARD_FILTER_SCOPE_GLOBAL;
 
             const immuneChartIds = new Set(filterImmuneSlices.slice());
             if (Object.keys(filterImmuneSliceFields).length) {

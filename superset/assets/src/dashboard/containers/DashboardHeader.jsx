@@ -52,7 +52,7 @@ import {
 
 import { logEvent } from '../../logger/actions';
 import { DASHBOARD_HEADER_ID } from '../util/constants';
-import { getActiveFilters } from '../util/activeDashboardFilters';
+import { getActiveFilterValues } from '../util/activeDashboardFilters';
 
 function mapStateToProps({
   dashboardLayout: undoableLayout,
@@ -65,7 +65,7 @@ function mapStateToProps({
     undoLength: undoableLayout.past.length,
     redoLength: undoableLayout.future.length,
     layout: undoableLayout.present,
-    filters: getActiveFilters(),
+    filters: getActiveFilterValues(),
     dashboardTitle: (
       (undoableLayout.present[DASHBOARD_HEADER_ID] || {}).meta || {}
     ).text,

@@ -19,7 +19,11 @@
 
 import { CHART_TYPE } from '../util/componentTypes';
 
-export default function getChartIdsInFilterScope({ filterScope, components }) {
+export default function getChartIdsInFilterScope({
+  filterId,
+  filterScope,
+  components,
+}) {
   function traverse(chartIds, component, immuneChartIds) {
     if (!component) {
       return;
@@ -29,7 +33,8 @@ export default function getChartIdsInFilterScope({ filterScope, components }) {
       component.type === CHART_TYPE &&
       component.meta &&
       component.meta.chartId &&
-      !immuneChartIds.includes(component.meta.chartId)
+      !immuneChartIds.includes(component.meta.chartId) &&
+      filterId !== component.meta.chartId
     ) {
       chartIds.push(component.meta.chartId);
     } else if (component.children) {

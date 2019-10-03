@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 
 import ComponentLookup from '../components/gridComponents';
 import getDetailedComponentWidth from '../util/getDetailedComponentWidth';
-import { getActiveFilters } from '../util/activeDashboardFilters';
+import { getActiveFilterValues } from '../util/activeDashboardFilters';
 import { componentShape } from '../util/propShapes';
 import { COLUMN_TYPE, ROW_TYPE } from '../util/componentTypes';
 
@@ -65,7 +65,7 @@ function mapStateToProps(
     component,
     parentComponent: dashboardLayout[parentId],
     editMode: dashboardState.editMode,
-    filters: getActiveFilters(),
+    filters: getActiveFilterValues(),
     directPathToChild: dashboardState.directPathToChild,
     directPathLastUpdated: dashboardState.directPathLastUpdated,
     filterFieldOnFocus:

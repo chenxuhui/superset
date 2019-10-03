@@ -27,7 +27,8 @@ import {
 } from '../actions/dashboardState';
 import { triggerQuery } from '../../chart/chartAction';
 import { logEvent } from '../../logger/actions';
-import { getActiveFilters } from '../util/activeDashboardFilters';
+import { getActiveFilterFields } from '../util/activeDashboardFilters';
+import getChartIdsInFilterScope from '../util/getChartIdsInFilterScope';
 
 function mapStateToProps(state) {
   const {
@@ -37,9 +38,37 @@ function mapStateToProps(state) {
     dashboardInfo,
     dashboardState,
     dashboardLayout,
+    dashboardFilters,
     impressionId,
   } = state;
 
+  const layout = dashboardLayout.present;
+  const activeFilterFields = getActiveFilterFields();
+  const filters = Object.keys(activeFilterFields).reduce(
+    (mapByFilterId, filterId) => {
+      const fields = activeFilterFields[filterId];
+      const filterState = fields.reduce(
+        (mapByFieldName, fieldName) => ({
+          ...mapByFieldName,
+          [fieldName]: {
+            values: dashboardFilters[filterId].columns[fieldName],
+            scope: getChartIdsInFilterScope({
+              filterId: parseInt(filterId, 10),
+              filterScope: dashboardFilters[filterId].scopes[fieldName],
+              components: layout,
+            }),
+          },
+        }),
+        {},
+      );
+
+      return {
+        ...mapByFilterId,
+        [filterId]: filterState,
+      };
+    },
+    {},
+  );
   return {
     initMessages: dashboardInfo.common.flash_messages,
     timeout: dashboardInfo.common.conf.SUPERSET_WEBSERVER_TIMEOUT,
@@ -48,13 +77,13 @@ function mapStateToProps(state) {
     dashboardState,
     charts,
     datasources,
-    // filters prop: All the filter_box's state in this dashboard
+    // filters prop: non-empty filter_box's selected value and scope.
     // When dashboard is first loaded into browser,
     // its value is from preselect_filters that dashboard owner saved in dashboard's meta data
     // When user start interacting with dashboard, it will be user picked values from all filter_box
-    filters: getActiveFilters(),
+    filters,
     slices: sliceEntities.slices,
-    layout: dashboardLayout.present,
+    layout,
     impressionId,
   };
 }

@@ -87,8 +87,9 @@ export default class FilterIndicatorsContainer extends React.PureComponent {
         // do not apply filter on filter_box itself
         // do not apply filter on filterImmuneSlices list or filterImmuneSliceFields
         if (currentChartId !== chartId) {
-          Object.keys(columns).forEach(name => {
+          Object.keys(scopes).forEach(name => {
             const chartIdsInFilterScope = getChartIdsInFilterScope({
+              filterId: chartId,
               filterScope: scopes[name],
               components,
             });
