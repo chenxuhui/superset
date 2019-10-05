@@ -17,7 +17,6 @@
  * under the License.
  */
 /* eslint-disable camelcase */
-import { DASHBOARD_ROOT_ID } from '../util/constants';
 import {
   ADD_FILTER,
   REMOVE_FILTER,
@@ -33,10 +32,11 @@ export const dashboardFilter = {
   chartId: 0,
   componentId: '',
   directPathToFilter: [],
-  scope: DASHBOARD_ROOT_ID,
   isDateFilter: false,
   isInstantFilter: true,
   columns: {},
+  labels: {},
+  scopes: {},
 };
 
 export default function dashboardFiltersReducer(dashboardFilters = {}, action) {

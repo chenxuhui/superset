@@ -26,6 +26,7 @@ import HeaderActionsDropdown from './HeaderActionsDropdown';
 import EditableTitle from '../../components/EditableTitle';
 import Button from '../../components/Button';
 import FaveStar from '../../components/FaveStar';
+import FilterScopeModal from './FilterScopeModal';
 import PublishedStatus from './PublishedStatus';
 import UndoRedoKeylisteners from './UndoRedoKeylisteners';
 
@@ -108,6 +109,7 @@ class Header extends React.PureComponent {
     this.handleChangeText = this.handleChangeText.bind(this);
     this.handleCtrlZ = this.handleCtrlZ.bind(this);
     this.handleCtrlY = this.handleCtrlY.bind(this);
+    this.handleSaveFilterScope = this.handleSaveFilterScope.bind(this);
     this.onInsertComponentsButtonClick = this.onInsertComponentsButtonClick.bind(
       this,
     );
@@ -178,6 +180,10 @@ class Header extends React.PureComponent {
         this.setState({ emphasizeUndo: false });
       }, 100);
     });
+  }
+
+  handleSaveFilterScope() {
+    console.log('i am chart holder onSave');
   }
 
   forceRefresh() {
@@ -347,7 +353,7 @@ class Header extends React.PureComponent {
                   bsSize="small"
                   onClick={this.onInsertComponentsButtonClick}
                 >
-                  {t('Insert components')}
+                  {t('Components')}
                 </Button>
               )}
 
@@ -359,6 +365,13 @@ class Header extends React.PureComponent {
                 >
                   {t('Colors')}
                 </Button>
+              )}
+
+              {editMode && (
+                <FilterScopeModal
+                  triggerNode={<Button bsSize="small">{t('Filters')}</Button>}
+                  onSaveFilterScope={this.handleSaveFilterScope}
+                />
               )}
 
               {editMode && hasUnsavedChanges && (

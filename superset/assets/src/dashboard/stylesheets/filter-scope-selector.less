@@ -1,0 +1,117 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.filter-scope-container {
+  .filter-scope-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    input {
+      flex: 0 0 200px;
+    }
+  }
+
+  .nav.nav-tabs {
+    border: none;
+  }
+}
+
+.filters-scope-selector {
+  margin: 20px -24px;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-right: none;
+
+  .nav-bar {
+    width: 40%;
+    padding: 24px;
+    border-right: 1px solid #ccc;
+  }
+
+  .nav-pills {
+    & > li > a {
+      display: flex;
+
+      svg {
+        flex: 0 0 20px;
+      }
+    }
+
+    & > li.active > a {
+      color: #333;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin: -1px;
+    }
+
+    label {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      font-weight: 700;
+      margin: 0 0 0 5px;
+    }
+  }
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .react-checkbox-tree {
+    font-size: 14px;
+
+    .rct-checkbox {
+      svg {
+        position: relative;
+        top: 4px;
+      }
+    }
+
+    .rct-node-leaf {
+      .rct-title {
+        font-weight: 400;
+      }
+
+      .rct-bare-label {
+        &::before {
+          padding-left: 5px;
+          content: "Current filter: ";
+        }
+
+        .rct-title {
+          font-weight: 700;
+          font-style: italic;
+        }
+      }
+    }
+
+    .rct-options {
+      position: absolute;
+      right: 24px;
+    }
+
+    .rct-title {
+      font-weight: 700;
+    }
+  }
+}
