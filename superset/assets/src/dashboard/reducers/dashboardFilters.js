@@ -31,6 +31,7 @@ import { buildActiveFilters } from '../util/activeDashboardFilters';
 export const dashboardFilter = {
   chartId: 0,
   componentId: '',
+  filterName: '',
   directPathToFilter: [],
   isDateFilter: false,
   isInstantFilter: true,
@@ -52,6 +53,7 @@ export default function dashboardFiltersReducer(dashboardFilters = {}, action) {
         ...dashboardFilter,
         chartId,
         componentId: component.id,
+        filterName: component.meta.sliceName,
         directPathToFilter,
         columns,
         labels,

@@ -19,44 +19,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import ModalTrigger from '../../components/ModalTrigger';
-import FilterScope from '../containers/FilterScope';
+import FilterBadgeIcon from '../../../components/FilterBadgeIcon';
 
 const propTypes = {
-  triggerNode: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  colorCode: PropTypes.string.isRequired,
 };
 
-export default class FilterScopeModal extends React.PureComponent {
-  constructor(props) {
-    super(props);
-
-    this.modal = null;
-    this.close = this.close.bind(this);
-    this.setModalRef = this.setModalRef.bind(this);
-  }
-
-  setModalRef(ref) {
-    this.modal = ref;
-  }
-
-  close() {
-    this.modal.close();
-  }
-
-  render() {
-    return (
-      <ModalTrigger
-        dialogClassName="filter-scope-modal"
-        ref={this.setModalRef}
-        triggerNode={this.props.triggerNode}
-        modalBody={
-          <div className="dashboard-modal filter-scope">
-            <FilterScope onCloseModal={this.close} />
-          </div>
-        }
-      />
-    );
-  }
+export default function FilterFieldItem({ label, colorCode = '' }) {
+  return (
+    <a className="filter-field-item filter-container">
+      <FilterBadgeIcon colorCode={colorCode} />
+      <label htmlFor={label}>{label}</label>
+    </a>
+  );
 }
 
-FilterScopeModal.propTypes = propTypes;
+FilterFieldItem.propTypes = propTypes;

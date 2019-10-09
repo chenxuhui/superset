@@ -27,6 +27,10 @@ export function getActiveFilters() {
 // when define filter scopes, they have to be out pulled out in a few places.
 // after we make filterbox a dashboard build-in component,
 // will not need this check anymore
+export function isFilterBox(chartId) {
+  return allFilterIds.includes(chartId);
+}
+
 export function getAllFilterIds() {
   return allFilterIds;
 }

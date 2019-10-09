@@ -180,6 +180,7 @@ export default function(bootstrapData) {
           ...dashboardFilter,
           chartId: key,
           componentId,
+          filterName: slice.slice_name,
           directPathToFilter,
           columns,
           labels,

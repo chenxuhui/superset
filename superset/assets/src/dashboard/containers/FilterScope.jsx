@@ -20,7 +20,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import { setDirectPathToChild } from '../actions/dashboardState';
-import FilterScopeSelector from '../components/FilterScopeSelector';
+import FilterScopeSelector from '../components/filterscope/FilterScopeSelector';
 
 function mapStateToProps({ dashboardLayout, dashboardFilters, dashboardInfo }, ownProps) {
   return {

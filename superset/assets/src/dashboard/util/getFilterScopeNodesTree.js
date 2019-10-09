@@ -16,35 +16,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isFilterBox } from './activeDashboardFilters';
 import { DASHBOARD_ROOT_ID } from './constants';
-import { CHART_TYPE, DASHBOARD_ROOT_TYPE, TAB_TYPE } from '../util/componentTypes';
+import {
+  CHART_TYPE,
+  DASHBOARD_ROOT_TYPE,
+  TAB_TYPE,
+} from '../util/componentTypes';
 
 const FILTER_SCOPE_CONTAINER_TYPES = [
   TAB_TYPE,
   DASHBOARD_ROOT_TYPE,
 ];
 
-export default function getFilterScopeNodesTree(
+export default function getFilterScopeNodesTree({
   components = {},
-  filterChartIds = [],
-) {
+  isSingleEditMode = true,
+  checkedFilterFields = [],
+}) {
   function traverse(currentNode) {
     if (!currentNode) {
-      return;
+      return null;
     }
 
     const type = currentNode.type;
     if (
       CHART_TYPE === type &&
-      currentNode.meta.chartId
-      // && !isFilterBox(currentNode.meta.chartId)
+      currentNode.meta.chartId &&
+      !isFilterBox(currentNode.meta.chartId)
     ) {
-      return {
+      const chartNode = {
         value: currentNode.meta.chartId,
         label:
           currentNode.meta.sliceName || `${type} ${currentNode.meta.chartId}`,
-        // showCheckbox: false,
-        showCheckbox: !filterChartIds.includes(currentNode.meta.chartId),
+        type: 'filter-scope-chart',
+      };
+
+      if (isSingleEditMode) {
+        return chartNode;
+      }
+
+      return {
+        ...chartNode,
+        children: checkedFilterFields.map(filterField => ({
+          value: `${currentNode.meta.chartId}:${filterField}`,
+          label: `${currentNode.meta.chartId}:${filterField}`,
+          type: 'filter-scope-filter',
+          showCheckbox: false,
+        })),
       };
     }
 
@@ -63,12 +82,24 @@ export default function getFilterScopeNodesTree(
     }
 
     if (FILTER_SCOPE_CONTAINER_TYPES.includes(type)) {
+      let label = '';
+      let filterScopeItemType = 'filter-scope-tab';
+      if (type === DASHBOARD_ROOT_TYPE) {
+        label = 'All dashboard';
+        filterScopeItemType = 'filter-scope-root';
+      } else {
+        label =
+          currentNode.meta && currentNode.meta.text
+            ? currentNode.meta.text
+            : `${type} ${currentNode.id}`;
+      }
+
       return {
         value: currentNode.id,
-        label: type === DASHBOARD_ROOT_TYPE ? 'All dashboard' :
-          (currentNode.meta && currentNode.meta.text) ? currentNode.meta.text : `${type} ${currentNode.id}`,
+        label,
+        type: filterScopeItemType,
         children,
-      }
+      };
     }
 
     return children;

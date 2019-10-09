@@ -21,9 +21,10 @@ import PropTypes from 'prop-types';
 import CheckboxTree from 'react-checkbox-tree';
 
 import 'react-checkbox-tree/lib/react-checkbox-tree.css';
-import CheckboxChecked from '../../components/CheckboxChecked';
-import CheckboxUnchecked from '../../components/CheckboxUnchecked';
-import CheckboxHalfchecked from '../../components/CheckboxHalfchecked';
+import CheckboxChecked from '../../../components/CheckboxChecked';
+import CheckboxUnchecked from '../../../components/CheckboxUnchecked';
+import CheckboxHalfchecked from '../../../components/CheckboxHalfchecked';
+import renderFilterFieldTreeNodes from './renderFilterFieldTreeNodes';
 
 const propTypes = {
   nodes: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -31,22 +32,25 @@ const propTypes = {
   expanded: PropTypes.arrayOf(PropTypes.string).isRequired,
   onCheck: PropTypes.func.isRequired,
   onExpand: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
-export default function FilterScopeTree({
+export default function FilterFieldTree({
   nodes,
   checked,
   expanded,
+  onClick,
   onCheck,
   onExpand,
 }) {
   return (
     <CheckboxTree
-      showExpandAll
       showNodeIcon={false}
-      nodes={nodes}
+      expandOnClick
+      nodes={renderFilterFieldTreeNodes(nodes)}
       checked={checked}
       expanded={expanded}
+      onClick={onClick}
       onCheck={onCheck}
       onExpand={onExpand}
       icons={{
@@ -65,4 +69,4 @@ export default function FilterScopeTree({
   );
 }
 
-FilterScopeTree.propTypes = propTypes;
+FilterFieldTree.propTypes = propTypes;
