@@ -49,7 +49,7 @@ export default function getFilterScopeNodesTree({
         value: currentNode.meta.chartId,
         label:
           currentNode.meta.sliceName || `${type} ${currentNode.meta.chartId}`,
-        type: 'filter-scope-chart',
+        type,
       };
 
       if (isSingleEditMode) {
@@ -61,7 +61,7 @@ export default function getFilterScopeNodesTree({
         children: checkedFilterFields.map(filterField => ({
           value: `${currentNode.meta.chartId}:${filterField}`,
           label: `${currentNode.meta.chartId}:${filterField}`,
-          type: 'filter-scope-filter',
+          type,
           showCheckbox: false,
         })),
       };
@@ -83,10 +83,8 @@ export default function getFilterScopeNodesTree({
 
     if (FILTER_SCOPE_CONTAINER_TYPES.includes(type)) {
       let label = '';
-      let filterScopeItemType = 'filter-scope-tab';
       if (type === DASHBOARD_ROOT_TYPE) {
         label = 'All dashboard';
-        filterScopeItemType = 'filter-scope-root';
       } else {
         label =
           currentNode.meta && currentNode.meta.text
@@ -97,7 +95,7 @@ export default function getFilterScopeNodesTree({
       return {
         value: currentNode.id,
         label,
-        type: filterScopeItemType,
+        type,
         children,
       };
     }

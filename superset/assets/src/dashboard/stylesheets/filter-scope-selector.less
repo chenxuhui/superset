@@ -30,6 +30,10 @@
     input {
       flex: 0 0 200px;
     }
+
+    .multi-edit-mode.filter-text {
+      display: none;
+    }
   }
 
   .nav.nav-tabs {
@@ -49,6 +53,18 @@
   a, a:active, a:hover {
     color: @almost-black;
     text-decoration: none;
+  }
+
+  .filter-field-pane .edit-mode-toggle,
+  .filter-scope-pane .react-checkbox-tree .rct-icon.rct-icon-expand-all,
+  .filter-scope-pane .react-checkbox-tree .rct-icon.rct-icon-collapse-all {
+    font-size: 13px;
+    font-family: @font-family-sans-serif;
+    color: @brand-primary;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   .filter-field-pane {
@@ -74,9 +90,7 @@
     color: @almost-black;
     font-size: 14px;
 
-    .filter-scope-chart,
-    .filter-scope-tab,
-    .filter-scope-filter {
+    .filter-scope-type {
       &::before {
         border: 1px solid @gray-light;
         border-radius: 4px;
@@ -85,23 +99,23 @@
         margin-right: 4px;
         font-weight: 400;
       }
-    }
 
-    .filter-scope-chart {
-      &::before {
-        content: 'Chart';
+      &.chart {
+        &::before {
+          content: 'Chart';
+        }
       }
-    }
 
-    .filter-scope-root {
-      font-weight: 700;
-    }
+      &.root {
+        font-weight: 700;
+      }
 
-    .filter-scope-tab {
-      font-weight: 700;
+      &.tab {
+        font-weight: 700;
 
-      &::before {
-        content: 'Tab';
+        &::before {
+          content: 'Tab';
+        }
       }
     }
 
@@ -121,10 +135,6 @@
     }
 
     .rct-option .rct-icon {
-      font-size: 13px;
-      font-family: @font-family-sans-serif;
-      color: @brand-primary;
-
       &.rct-icon-expand-all {
         &::before {
           content: 'Expand all';
@@ -143,8 +153,7 @@
     }
 
     .rct-text {
-      height: 20px;
-      margin-bottom: 10px;
+      margin: 8px 0;
       display: flex;
     }
   }

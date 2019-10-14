@@ -33,14 +33,18 @@ export default function renderFilterScopeTreeNodes(nodes) {
       const updatedChildren = children.map(child => traverse(child));
       return {
         ...currentNode,
-        label: <a className={type}>{label}</a>,
+        label: (
+          <a className={`filter-scope-type ${type.toLowerCase()}`}>{label}</a>
+        ),
         children: updatedChildren,
       };
     }
 
     return {
       ...currentNode,
-      label: <a className={type}>{label}</a>,
+      label: (
+        <a className={`filter-scope-type ${type.toLowerCase()}`}>{label}</a>
+      ),
     };
   }
 

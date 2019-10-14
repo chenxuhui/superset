@@ -25,20 +25,20 @@ import { t } from '@superset-ui/translation';
 import getFilterScopeNodesTree from '../../util/getFilterScopeNodesTree';
 import getFilterFieldNodesTree from '../../util/getFilterFieldNodesTree';
 import getFilterScopeParentNodes from '../../util/getFilterScopeParentNodes';
-import getCurrentScopeChartIds from '../../util/getCurrentScopeChartIds';
+import getFilterScopeFromNodesTree from '../../util/getFilterScopeFromNodesTree';
 import getRevertedFilterScope from '../../util/getRevertedFilterScope';
 import FilterScopeTree from './FilterScopeTree';
 import FilterFieldTree from './FilterFieldTree';
+import { getChartIdsInFilterScope } from '../../util/activeDashboardFilters';
 import { getDashboardFilterKey } from '../../util/getDashboardFilterKey';
-import { getFilterColorMap } from '../../util/dashboardFiltersColorMap';
+import { dashboardFilterPropShape } from '../../util/propShapes';
 
 const propTypes = {
-  dashboardFilters: PropTypes.object.isRequired,
+  dashboardFilters: dashboardFilterPropShape.isRequired,
   layout: PropTypes.object.isRequired,
-  filterImmuneSlices: PropTypes.arrayOf(PropTypes.number).isRequired,
-  filterImmuneSliceFields: PropTypes.object.isRequired,
 
-  setDirectPathToChild: PropTypes.func.isRequired,
+  updateDashboardFiltersScope: PropTypes.func.isRequired,
+  setUnsavedChanges: PropTypes.func.isRequired,
   onCloseModal: PropTypes.func.isRequired,
 };
 
@@ -46,15 +46,7 @@ export default class FilterScopeSelector extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    const {
-      dashboardFilters,
-      filterImmuneSlices,
-      filterImmuneSliceFields,
-      layout,
-    } = props;
-
-    this.dashboardFiltersColorMap = getFilterColorMap();
-
+    const { dashboardFilters, layout } = props;
     // display filter fields in tree structure
     const filterFieldNodes = getFilterFieldNodesTree({
       dashboardFilters,
@@ -71,9 +63,10 @@ export default class FilterScopeSelector extends React.PureComponent {
       ? filterFieldNodes[0].children[0].value
       : '';
     const checkedFilterFields = [this.defaultFilterKey];
-    const expandedFilterIds = getFilterScopeParentNodes(filterFieldNodes, 1);
+    // do not expand filter box
+    const expandedFilterIds = [];
 
-    // display checkbox tree of whole dashboard layout
+    // display whole dashboard layout in tree structure
     const nodes = getFilterScopeNodesTree({
       components: layout,
       isSingleEditMode: true,
@@ -85,6 +78,14 @@ export default class FilterScopeSelector extends React.PureComponent {
         const filterScopeByChartId = Object.keys(columns).reduce(
           (mapByChartId, columnName) => {
             const filterKey = getDashboardFilterKey(chartId, columnName);
+            const chartIdsInFilterScope = getChartIdsInFilterScope({
+              filterScope: dashboardFilters[chartId].scopes[columnName],
+            });
+            // remove filter's id from its scope
+            chartIdsInFilterScope.splice(
+              chartIdsInFilterScope.indexOf(chartId),
+              1,
+            );
             return {
               ...mapByChartId,
               [filterKey]: {
@@ -92,13 +93,7 @@ export default class FilterScopeSelector extends React.PureComponent {
                 nodes,
                 // filtered nodes in display if searchText is not empty
                 nodesFiltered: nodes.slice(),
-                checked: getCurrentScopeChartIds({
-                  scopeComponentIds: ['ROOT_ID'], //dashboardFilters[chartId].scopes[columnName],
-                  filterField: columnName,
-                  filterImmuneSlices,
-                  filterImmuneSliceFields,
-                  components: layout,
-                }),
+                checked: chartIdsInFilterScope.slice(),
                 expanded,
               },
             };
@@ -246,11 +241,7 @@ export default class FilterScopeSelector extends React.PureComponent {
   }
 
   onToggleEditMode() {
-    const {
-      activeKey,
-      isSingleEditMode,
-      checkedFilterFields,
-    } = this.state;
+    const { activeKey, isSingleEditMode, checkedFilterFields } = this.state;
     const { dashboardFilters } = this.props;
     if (isSingleEditMode) {
       // single edit => multi edit
@@ -291,16 +282,21 @@ export default class FilterScopeSelector extends React.PureComponent {
   onSave() {
     const { filterScopeMap } = this.state;
 
-    console.log(
-      'i am current state',
-      this.allfilterFields.reduce(
-        (map, key) => ({
-          ...map,
-          [key]: filterScopeMap[key].checked,
-        }),
-        {},
-      ),
+    const currentFiltersState = this.allfilterFields.reduce(
+      (map, key) => ({
+        ...map,
+        [key]: {
+          nodes: filterScopeMap[key].nodes,
+          checked: filterScopeMap[key].checked,
+        },
+      }),
+      {},
     );
+    console.log('i am current state', currentFiltersState);
+    this.props.updateDashboardFiltersScope(
+      getFilterScopeFromNodesTree(currentFiltersState),
+    );
+    this.props.setUnsavedChanges(true);
     this.props.onCloseModal();
   }
 
@@ -392,9 +388,8 @@ export default class FilterScopeSelector extends React.PureComponent {
   renderEditModeControl() {
     const { isSingleEditMode } = this.state;
     return (
-      <a
-        onClick={this.onToggleEditMode}
-      >
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+      <a className="edit-mode-toggle" onClick={this.onToggleEditMode}>
         {isSingleEditMode
           ? t('Edit multiple filters')
           : t('Edit individual filter')}
@@ -411,7 +406,9 @@ export default class FilterScopeSelector extends React.PureComponent {
           <div className="filter-scope-header">
             <h4>{t('Configure filter scopes')}</h4>
             <input
-              className="filter-text"
+              className={cx('filter-text', {
+                'multi-edit-mode': !isSingleEditMode,
+              })}
               placeholder="Search..."
               type="text"
               value={searchText}
