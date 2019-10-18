@@ -22,11 +22,20 @@ import {
   REMOVE_FILTER,
   CHANGE_FILTER,
   UPDATE_DIRECT_PATH_TO_FILTER,
+  UPDATE_LAYOUT_COMPONENTS,
+  UPDATE_DASHBOARD_FILTERS_SCOPE,
 } from '../actions/dashboardFilters';
 import { TIME_RANGE } from '../../visualizations/FilterBox/FilterBox';
+import { DASHBOARD_ROOT_ID } from '../util/constants';
 import getFilterConfigsFromFormdata from '../util/getFilterConfigsFromFormdata';
 import { buildFilterColorMap } from '../util/dashboardFiltersColorMap';
 import { buildActiveFilters } from '../util/activeDashboardFilters';
+import { getDashboardFilterByKey } from '../util/getDashboardFilterKey';
+
+export const DASHBOARD_FILTER_SCOPE_GLOBAL = {
+  scope: [DASHBOARD_ROOT_ID],
+  immune: [],
+};
 
 export const dashboardFilter = {
   chartId: 0,
@@ -57,6 +66,13 @@ export default function dashboardFiltersReducer(dashboardFilters = {}, action) {
         directPathToFilter,
         columns,
         labels,
+        scopes: Object.keys(columns).reduce(
+          (map, column) => ({
+            ...map,
+            [column]: DASHBOARD_FILTER_SCOPE_GLOBAL,
+          }),
+          {},
+        ),
         isInstantFilter: !!form_data.instant_filtering,
         isDateFilter: Object.keys(columns).includes(TIME_RANGE),
       };
@@ -99,10 +115,42 @@ export default function dashboardFiltersReducer(dashboardFilters = {}, action) {
     },
   };
 
-  if (action.type === REMOVE_FILTER) {
+  if (action.type === UPDATE_LAYOUT_COMPONENTS) {
+    buildActiveFilters({
+      dashboardFilters,
+      components: action.components,
+    });
+    return dashboardFilters;
+  } else if (action.type === UPDATE_DASHBOARD_FILTERS_SCOPE) {
+    const allDashboardFiltersScope = action.scopes;
+    // update filter scope for each filter field
+    const updatedFilters = Object.entries(allDashboardFiltersScope).reduce(
+      (map, entry) => {
+        const [filterKey, { scope, immune }] = entry;
+        const [chartId, column] = getDashboardFilterByKey(filterKey);
+        const scopes = {
+          ...map[chartId].scopes,
+          [column]: {
+            scope,
+            immune,
+          },
+        };
+        return {
+          ...map,
+          [chartId]: {
+            ...map[chartId],
+            scopes,
+          },
+        };
+      },
+      dashboardFilters,
+    );
+
+    return updatedFilters;
+  } else if (action.type === REMOVE_FILTER) {
     const { chartId } = action;
     const { [chartId]: deletedFilter, ...updatedFilters } = dashboardFilters;
-    buildActiveFilters(updatedFilters);
+    buildActiveFilters({ dashboardFilters: updatedFilters });
     buildFilterColorMap(updatedFilters);
 
     return updatedFilters;
@@ -113,7 +161,7 @@ export default function dashboardFiltersReducer(dashboardFilters = {}, action) {
         dashboardFilters[action.chartId],
       ),
     };
-    buildActiveFilters(updatedFilters);
+    buildActiveFilters({ dashboardFilters: updatedFilters });
     buildFilterColorMap(updatedFilters);
 
     return updatedFilters;
