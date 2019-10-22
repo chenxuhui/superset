@@ -1587,6 +1587,7 @@ class Superset(BaseSupersetView):
         dash = session.query(models.Dashboard).filter_by(id=dashboard_id).first()
         check_ownership(dash, raise_if_false=True)
         data = json.loads(request.form.get("data"))
+        print('\n\n i am data: {}'.format(data))
         self._set_dash_metadata(dash, data)
         session.merge(dash)
         session.commit()
@@ -1634,12 +1635,18 @@ class Superset(BaseSupersetView):
         dashboard.css = data.get("css")
         dashboard.dashboard_title = data["dashboard_title"]
 
-        if "filter_immune_slices" not in md:
-            md["filter_immune_slices"] = []
         if "timed_refresh_immune_slices" not in md:
             md["timed_refresh_immune_slices"] = []
-        if "filter_immune_slice_fields" not in md:
-            md["filter_immune_slice_fields"] = {}
+
+        if data["filter_scopes"]:
+            md.pop("filter_immune_slices", None)
+            md.pop("filter_immune_slice_fields", None)
+            md["filter_scopes"] = json.loads(data.get("filter_scopes", "{}"))
+        else:
+            if "filter_immune_slices" not in md:
+                md["filter_immune_slices"] = []
+            if "filter_immune_slice_fields" not in md:
+                md["filter_immune_slice_fields"] = {}
         md["expanded_slices"] = data["expanded_slices"]
         md["refresh_frequency"] = data.get("refresh_frequency", 0)
         default_filters_data = json.loads(data.get("default_filters", "{}"))
